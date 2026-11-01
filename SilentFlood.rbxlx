@@ -1,0 +1,1534 @@
+<roblox version="4">
+	<Item class="Workspace" referent="RBX-WS">
+		<Properties><string name="Name">Workspace</string></Properties>
+	</Item>
+	<Item class="ReplicatedStorage" referent="RBX-RS">
+		<Properties><string name="Name">ReplicatedStorage</string></Properties>
+		<Item class="ModuleScript" referent="RBX-CFG">
+			<Properties>
+				<string name="Name">BloxConfig</string>
+				<ProtectedString name="Source"><![CDATA[-- Silent Flood — BloxConfig (ModuleScript, ReplicatedStorage)
+-- All prices, loot tables, rewards, map layout, combat numbers, maturity answers.
+-- Data-driven so balance changes never touch a script.
+
+local Config = {}
+
+-- ============================================================
+-- Maturity / compliance answers (mirror the Creator Dashboard questionnaire)
+-- ============================================================
+Config.Maturity = {
+    Violence = "Mild",          -- monster chases; no gore, no realistic blood
+    Blood = "None",
+    Fear = "Moderate",          -- horror atmosphere, jumpscares via audio
+    CrudeHumor = "None",
+    Gambling = "Unplayable",     -- paid random items disclosed, not gambling
+    AlcoholDrugs = "None",
+    Romantic = "None",
+    Language = "None",
+}
+
+-- ============================================================
+-- Game constants
+-- ============================================================
+Config.GAME_NAME = "Silent Flood"
+Config.MAX_PLAYERS_PER_SERVER = 10
+Config.ROUND_TIME = 300
+Config.INTERMISSION = 10
+Config.MAX_FLOOR = 8
+Config.RESPAWN_DELAY = 5
+
+-- ============================================================
+-- Passes (one-time, permanent privileges)
+-- ============================================================
+Config.PASSES = {
+    VIP = { Id = 0, Price = 99, Name = "VIP Pass", Grants = { CoinBoost = 1.5, Trail = "VIPTrail", RespawnShield = true, ChatTag = "VIP" } },
+    AutoSprint = { Id = 0, Price = 49, Name = "Auto-Sprint Pass", Grants = { SprintMult = 1.25 } },
+    ExtraPebbleSlot = { Id = 0, Price = 29, Name = "Extra Pebble Slot", Grants = { PebbleCap = 4 } },
+}
+
+-- ============================================================
+-- Developer Products (repeatable)
+-- ============================================================
+Config.PRODUCTS = {
+    Coins250 = { Id = 0, Price = 25, Grant = { Coins = 250 } },
+    Coins800 = { Id = 0, Price = 75, Grant = { Coins = 800 } },
+    Coins2000 = { Id = 0, Price = 150, Grant = { Coins = 2000 } },
+    Coins5000 = { Id = 0, Price = 300, Grant = { Coins = 5000 } },
+    ReviveToken = { Id = 0, Price = 15, Grant = { Revive = 1 } },
+    SpeedBoost5 = { Id = 0, Price = 20, Grant = { SpeedBoost = 300 } },
+    LuckyPebble = { Id = 0, Price = 30, Grant = { LuckyRoll = 1 } },
+    NeonTrail = { Id = 0, Price = 50, Grant = { Cosmetic = "NeonTrail" } },
+    GoldenPebble = { Id = 0, Price = 40, Grant = { Cosmetic = "GoldenPebble" } },
+}
+
+-- ============================================================
+-- Paid random item loot table (Lucky Pebble) — odds disclosed, sum 100
+-- ============================================================
+Config.LOOT_TABLES = {
+    LuckyPebble = {
+        { Outcome = "Common Pebble x3", Weight = 50, DisplayPct = 50 },
+        { Outcome = "Rare Pebble x1", Weight = 30, DisplayPct = 30 },
+        { Outcome = "Epic Pebble x1", Weight = 15, DisplayPct = 15 },
+        { Outcome = "Legendary Pebble x1", Weight = 5, DisplayPct = 5 },
+    },
+}
+
+-- ============================================================
+-- Gear (every entry declares exactly one Source)
+-- ============================================================
+Config.Gear = {
+    -- Free via rep tiers (real gameplay effects)
+    RepSpeedBoost = { Source = "rep", Tier = 1, Name = "Rep Speed +5%", Effect = { WalkSpeed = 5 } },
+    RepPickupRadius = { Source = "rep", Tier = 2, Name = "Pickup Radius +2", Effect = { PickupRadius = 2 } },
+    RepThrowRange = { Source = "rep", Tier = 3, Name = "Throw Range +5", Effect = { ThrowRange = 5 } },
+    -- Free via coins (spendable sink)
+    ThrowRange1 = { Source = "coils", Price = 50, Name = "Throwing Range I", Effect = { ThrowRange = 3 } },
+    ThrowRange2 = { Source = "coils", Price = 150, Name = "Throwing Range II", Effect = { ThrowRange = 5 } },
+    PebbleCap8 = { Source = "coils", Price = 75, Name = "Pebble Pouch (8)", Effect = { PebbleCap = 8 } },
+    PebbleCap12 = { Source = "coils", Price = 200, Name = "Pebble Satchel (12)", Effect = { PebbleCap = 12 } },
+    RescueSpeed = { Source = "coils", Price = 100, Name = "Rescue Speed", Effect = { RescueSpeed = 1.5 } },
+    ValveSpeed = { Source = "coils", Price = 120, Name = "Valve Speed", Effect = { ValveSpeed = 1.5 } },
+    -- Robux only (cosmetics / convenience)
+    VIPTrail = { Source = "robux", Name = "VIP Trail", Cosmetic = true },
+    NeonTrail = { Source = "robux", Name = "Neon Trail", Cosmetic = true },
+    GoldenPebble = { Source = "robux", Name = "Golden Pebble", Cosmetic = true },
+}
+
+Config.FreeGearRep = {
+    [1] = "RepSpeedBoost",
+    [2] = "RepPickupRadius",
+    [3] = "RepThrowRange",
+}
+
+Config.RobuxOnlyGear = { "VIPTrail", "NeonTrail", "GoldenPebble" }
+
+-- ============================================================
+-- Coin shop (free currency sink)
+-- ============================================================
+Config.UPGRADES = {
+    { Id = "ThrowRange1", Price = 50, Name = "Throwing Range I" },
+    { Id = "ThrowRange2", Price = 150, Name = "Throwing Range II" },
+    { Id = "PebbleCap8", Price = 75, Name = "Pebble Pouch (8)" },
+    { Id = "PebbleCap12", Price = 200, Name = "Pebble Satchel (12)" },
+    { Id = "RescueSpeed", Price = 100, Name = "Rescue Speed" },
+    { Id = "ValveSpeed", Price = 120, Name = "Valve Speed" },
+}
+
+-- ============================================================
+-- Rep tiers
+-- ============================================================
+Config.REP_TIERS = {
+    { Tier = 1, Rep = 0, Name = "Newcomer" },
+    { Tier = 2, Rep = 100, Name = "Survivor" },
+    { Tier = 3, Rep = 300, Name = "Veteran" },
+    { Tier = 4, Rep = 700, Name = "Expert" },
+    { Tier = 5, Rep = 1500, Name = "Master" },
+}
+
+-- ============================================================
+-- Daily login rewards (escalating over 7 days)
+-- ============================================================
+Config.DAILY_REWARDS = {
+    { Day = 1, Coins = 10, Item = nil },
+    { Day = 2, Coins = 20, Item = nil },
+    { Day = 3, Coins = 30, Item = "Pebble x2" },
+    { Day = 4, Coins = 50, Item = nil },
+    { Day = 5, Coins = 75, Item = "Pebble x3" },
+    { Day = 6, Coins = 100, Item = nil },
+    { Day = 7, Coins = 200, Item = "Rare Pebble" },
+}
+Config.STREAK_RESET_HOURS = 36
+Config.STREAK_CAP = 3
+
+Config.STREAK_MILESTONES = { 7, 14, 30, 60, 100 }
+
+-- ============================================================
+-- Rooms (data-driven layout)
+-- ============================================================
+Config.ROOMS = {
+    { Index = 1, Name = "Entry Hall", Platforms = 8, Hazards = "basic" },
+    { Index = 2, Name = "Sinking Floor", Platforms = 10, Hazards = "sinking" },
+    { Index = 3, Name = "Rotating Bridge", Platforms = 6, Hazards = "rotating" },
+    { Index = 4, Name = "Crushing Walls", Platforms = 12, Hazards = "crushing" },
+    { Index = 5, Name = "Memory Bridge", Platforms = 9, Hazards = "memory" },
+    { Index = 6, Name = "Drifting Platforms", Platforms = 11, Hazards = "drifting" },
+    { Index = 7, Name = "Dark Passage", Platforms = 13, Hazards = "dark" },
+    { Index = 8, Name = "Maintenance Lock", Platforms = 5, Hazards = "valves" },
+}
+
+-- ============================================================
+-- Entity (the sound-hunting monster)
+-- ============================================================
+Config.ENTITY = {
+    Name = "The Listener",
+    WalkSpeed = 8,
+    HearingRadius = 30,
+    Damage = 25,
+    DamageRange = 5,
+}
+
+-- ============================================================
+-- Validation (run from harness / assert at load)
+-- ============================================================
+function Config.validateGearSources()
+    for name, entry in pairs(Config.Gear) do
+        assert(entry.Source, "Gear entry without Source: " .. name)
+    end
+    for _, name in ipairs(Config.RobuxOnlyGear) do
+        assert(Config.Gear[name] and Config.Gear[name].Source == "robux", "RobuxOnlyGear not robux source: " .. name)
+    end
+    for tier, name in pairs(Config.FreeGearRep) do
+        assert(Config.Gear[name] and Config.Gear[name].Source == "rep", "FreeGearRep not rep source: " .. name)
+        assert(Config.Gear[name].Tier == tier, "FreeGearRep tier mismatch: " .. name)
+    end
+end
+
+function Config.validateLootTables()
+    for name, tbl in pairs(Config.LOOT_TABLES) do
+        local w, p = 0, 0
+        for _, e in ipairs(tbl) do
+            w = w + (e.Weight or 0)
+            p = p + (e.DisplayPct or 0)
+        end
+        assert(w == 100, name .. " weights sum to " .. w)
+        assert(p == 100, name .. " display pct sums to " .. p)
+    end
+end
+
+function Config.validateMonetization()
+    for k, v in pairs(Config.PASSES) do
+        assert(v.Price, "Pass without price: " .. k)
+        assert(v.Id ~= nil, "Pass without Id: " .. k)
+    end
+    for k, v in pairs(Config.PRODUCTS) do
+        assert(v.Price, "Product without price: " .. k)
+        assert(v.Id ~= nil, "Product without Id: " .. k)
+    end
+end
+
+return Config
+]]></ProtectedString>
+			</Properties>
+		</Item>
+	</Item>
+	<Item class="ServerScriptService" referent="RBX-SSS">
+		<Properties><string name="Name">ServerScriptService</string></Properties>
+		<Item class="Script" referent="RBX-SRV">
+			<Properties>
+				<string name="Name">BloxServer</string>
+				<ProtectedString name="Source"><![CDATA[-- Silent Flood — BloxServer (Script, ServerScriptService)
+-- Server-authoritative economy, ProcessReceipt, pass grants, round loop, combat.
+-- Clients send intents; server decides outcomes and pushes filtered snapshots.
+
+local Players = game:GetService("Players")
+local MarketplaceService = game:GetService("MarketplaceService")
+local DataStoreService = game:GetService("DataStoreService")
+local PolicyService = game:GetService("PolicyService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local Config = require(ReplicatedStorage:WaitForChild("BloxConfig"))
+
+-- ============================================================
+local function contains(t, v)
+    for _, x in ipairs(t) do
+        if x == v then return true end
+    end
+    return false
+end
+-- ============================================================
+local saveProfile
+local checkRepTier
+local checkAchievements
+local grantProduct
+local grantPass
+local giveCoins
+local giveRep
+local spawnEntity
+local damagePlayer
+local startRound
+local endRound
+local tryAutoStart
+
+-- ============================================================
+-- State
+-- ============================================================
+local store = DataStoreService:GetDataStore("SilentFlood_v1")
+local sessions = {}          -- [player] = session table
+local gameState = {
+    Phase = "Lobby",          -- "Lobby" | "Playing" | "Results"
+    CurrentFloor = 1,
+    Players = {},             -- [userId] = { player, alive, ... }
+    Entity = nil,
+    HeartbeatConn = nil,
+    RoundStart = 0,
+    AllFloorsCleared = false,
+    LastRoundAllCleared = false,
+    EscapesToday = 0,
+    OnlineCount = 0,
+}
+
+-- Pass / product ID maps (set to 0 until created in Creator Dashboard)
+local PASS_IDS = {
+    VIP = 0,
+    AutoSprint = 0,
+    ExtraPebbleSlot = 0,
+}
+local PRODUCT_IDS = {
+    Coins250 = 0,
+    Coins800 = 0,
+    Coins2000 = 0,
+    Coins5000 = 0,
+    ReviveToken = 0,
+    SpeedBoost5 = 0,
+    LuckyPebble = 0,
+    NeonTrail = 0,
+    GoldenPebble = 0,
+}
+
+-- Reverse maps
+local PASS_BY_ID = {}
+local PRODUCT_BY_ID = {}
+for k, v in pairs(Config.PASSES) do
+    if v.Id and v.Id ~= 0 then PASS_BY_ID[v.Id] = k end
+end
+for k, v in pairs(Config.PRODUCTS) do
+    if v.Id and v.Id ~= 0 then PRODUCT_BY_ID[v.Id] = k end
+end
+
+-- Rate limiting
+local rateLimits = {}  -- [player] = { [action] = { times = {} } }
+local function rateLimit(player, action, maxPerSec)
+    maxPerSec = maxPerSec or 10
+    rateLimits[player] = rateLimits[player] or {}
+    rateLimits[player][action] = rateLimits[player][action] or { times = {} }
+    local t = rateLimits[player][action].times
+    local now = tick()
+    -- prune old
+    local i = 1
+    while i <= #t do
+        if now - t[i] > 1 then table.remove(t, i) else i = i + 1 end
+    end
+    if #t >= maxPerSec then return false end
+    table.insert(t, now)
+    return true
+end
+
+-- ============================================================
+-- Remotes
+-- ============================================================
+local remotes = {}
+local function setupRemotes()
+    local function mk(name, cls)
+        local r = Instance.new(cls or "RemoteEvent")
+        r.Name = name
+        r.Parent = ReplicatedStorage
+        return r
+    end
+    remotes.GameStart = mk("GameStartRemote")
+    remotes.GameEnd = mk("GameEndRemote")
+    remotes.EntityDamage = mk("EntityDamageRemote")
+    remotes.DoorOpened = mk("DoorOpenedRemote")
+    remotes.CoinUpdate = mk("CoinUpdateRemote")
+    remotes.RepUpdate = mk("RepUpdateRemote")
+    remotes.Toast = mk("ToastRemote")
+    remotes.StoreUpdate = mk("StoreUpdateRemote")
+    remotes.SocialProof = mk("SocialProofRemote")
+    remotes.DailyReward = mk("DailyRewardRemote")
+    remotes.LootResult = mk("LootResultRemote")
+    remotes.QuickChat = mk("QuickChatRemote")
+    remotes.BuyUpgrade = mk("BuyUpgradeRemote", "RemoteFunction")
+    remotes.ClaimDaily = mk("ClaimDailyRemote", "RemoteFunction")
+    remotes.PromptPurchase = mk("PromptPurchaseRemote", "RemoteFunction")
+    remotes.ThrowPebble = mk("ThrowPebbleRemote")
+    remotes.OpenValve = mk("OpenValveRemote")
+    remotes.ReviveRequest = mk("ReviveRequestRemote")
+end
+
+setupRemotes()
+
+-- ============================================================
+-- Profile helpers
+-- ============================================================
+local function defaultProfile()
+    return {
+        Coins = 0,
+        Rep = 0,
+        RepTier = 1,
+        Gear = {},
+        Passes = {},
+        Receipts = {},
+        DailyStreak = 0,
+        LastLogin = 0,
+        TotalEscapes = 0,
+        TotalDeaths = 0,
+        BestFloor = 0,
+        Cosmetics = {},
+        Achievements = {},
+        Stats = { throws = 0, valves = 0, revives = 0 },
+    }
+end
+
+local function loadProfile(player)
+    local ok, data = pcall(function()
+        return store:GetAsync("player_" .. player.UserId)
+    end)
+    if not ok or not data then data = defaultProfile() end
+    -- forward-fill new fields
+    local d = defaultProfile()
+    for k, v in pairs(d) do
+        if data[k] == nil then data[k] = v end
+    end
+    if type(data.Receipts) ~= "table" then data.Receipts = {} end
+    if type(data.Gear) ~= "table" then data.Gear = {} end
+    if type(data.Passes) ~= "table" then data.Passes = {} end
+    if type(data.Cosmetics) ~= "table" then data.Cosmetics = {} end
+    if type(data.Achievements) ~= "table" then data.Achievements = {} end
+    if type(data.Stats) ~= "table" then data.Stats = {} end
+    local s = defaultProfile()
+    for k, v in pairs(s) do
+        if data.Stats[k] == nil then data.Stats[k] = v end
+    end
+    data.Stats = data.Stats
+    return data
+end
+
+saveProfile = function(player)
+    local s = sessions[player]
+    if not s then return end
+    pcall(function()
+        store:SetAsync("player_" .. player.UserId, s.Profile)
+    end)
+end
+
+-- ============================================================
+-- Pass / product grant logic
+-- ============================================================
+local function hasPass(player, passKey)
+    local s = sessions[player]
+    if not s then return false end
+    if s.Profile.Passes[passKey] then return true end
+    -- also check MarketplaceService for already-owned (pass may have been bought outside)
+    local passId = Config.PASSES[passKey] and Config.PASSES[passKey].Id or 0
+    if passId ~= 0 then
+        local ok, owns = pcall(function()
+            return MarketplaceService:UserOwnsGamePassAsync(player.UserId, passId)
+        end)
+        if ok and owns then
+            s.Profile.Passes[passKey] = true
+            return true
+        end
+    end
+    return false
+end
+
+grantPass = function(player, passKey)
+    local s = sessions[player]
+    if not s then return false end
+    -- PolicyService: pass grants don't need random-item check, but check eligibility
+    local cfg = Config.PASSES[passKey]
+    if not cfg then return false end
+    s.Profile.Passes[passKey] = true
+    -- apply grants
+    if cfg.Grants.CoinBoost then
+        s.CoinBoost = cfg.Grants.CoinBoost
+    end
+    if cfg.Grants.Trail then
+        table.insert(s.Profile.Cosmetics, cfg.Grants.Trail)
+    end
+    if cfg.Grants.RespawnShield then
+        s.RespawnShield = true
+    end
+    if cfg.Grants.SprintMult then
+        s.SprintMult = (s.SprintMult or 1) * cfg.Grants.SprintMult
+    end
+    if cfg.Grants.PebbleCap then
+        s.PebbleCapBonus = (s.PebbleCapBonus or 0) + cfg.Grants.PebbleCap
+    end
+    saveProfile(player)
+    remotes.Toast:FireClient(player, "Pass granted: " .. passKey)
+    return true
+end
+
+grantProduct = function(player, productKey)
+    local s = sessions[player]
+    if not s then return false end
+    local cfg = Config.PRODUCTS[productKey]
+    if not cfg then return false end
+    local g = cfg.Grant or {}
+    -- PolicyService check for paid random items
+    if productKey == "LuckyPebble" then
+        local paidRandomAllowed = player:GetAttribute("PaidRandomAllowed")
+        if paidRandomAllowed == false then
+            remotes.Toast:FireClient(player, "Paid random items not available for your account.")
+            return false
+        end
+    end
+    if g.Coins then
+        local mult = s.CoinBoost or 1
+        if hasPass(player, "VIP") then mult = mult * 1.5 end
+        -- VIP boost already in CoinBoost? apply once
+        giveCoins(player, math.floor(g.Coins * mult))
+    end
+    if g.Revive then
+        s.ReviveTokens = (s.ReviveTokens or 0) + g.Revive
+    end
+    if g.SpeedBoost then
+        s.SpeedBoostExpiry = tick() + g.SpeedBoost
+    end
+    if g.LuckyRoll then
+        -- paid random item: roll with disclosed odds
+        local tbl = Config.LOOT_TABLES.LuckyPebble
+        local roll = math.random(1, 100)
+        local acc = 0
+        local outcome = tbl[1].Outcome
+        for _, e in ipairs(tbl) do
+            acc = acc + e.Weight
+            if roll <= acc then outcome = e.Outcome break end
+        end
+        -- grant outcome
+        if string.find(outcome, "Pebble") then
+            s.Pebbles = (s.Pebbles or 0) + 1
+        end
+        remotes.LootResult:FireClient(player, outcome)
+    end
+    if g.Cosmetic then
+        if not contains(s.Profile.Cosmetics, g.Cosmetic) then
+            table.insert(s.Profile.Cosmetics, g.Cosmetic)
+        end
+    end
+    saveProfile(player)
+    return true
+end
+
+-- ============================================================
+-- Economy helpers
+-- ============================================================
+giveCoins = function(player, amount)
+    local s = sessions[player]
+    if not s then return end
+    s.Profile.Coins = (s.Profile.Coins or 0) + amount
+    remotes.CoinUpdate:FireClient(player, s.Profile.Coins)
+end
+
+giveRep = function(player, amount)
+    local s = sessions[player]
+    if not s then return end
+    s.Profile.Rep = (s.Profile.Rep or 0) + amount
+    checkRepTier(player)
+    remotes.RepUpdate:FireClient(player, s.Profile.Rep, s.Profile.RepTier)
+end
+
+checkRepTier = function(player)
+    local s = sessions[player]
+    if not s then return end
+    local newTier = 1
+    for _, rt in ipairs(Config.REP_TIERS) do
+        if s.Profile.Rep >= rt.Rep then newTier = rt.Tier end
+    end
+    if newTier > (s.Profile.RepTier or 1) then
+        s.Profile.RepTier = newTier
+        -- grant free gear for new tiers
+        for t = (s.Profile.RepTier or 1), newTier do
+            local gearName = Config.FreeGearRep[t]
+            if gearName and not s.Profile.Gear[gearName] then
+                s.Profile.Gear[gearName] = true
+                remotes.Toast:FireClient(player, "Unlocked: " .. Config.Gear[gearName].Name)
+            end
+        end
+        checkAchievements(player)
+    end
+end
+
+checkAchievements = function(player)
+    local s = sessions[player]
+    if not s then return end
+    -- milestone achievements
+    if s.Profile.TotalEscapes >= 1 and not s.Profile.Achievements["FirstEscape"] then
+        s.Profile.Achievements["FirstEscape"] = true
+        giveRep(player, 10)
+        remotes.Toast:FireClient(player, "Achievement: First Escape! (+10 Rep)")
+    end
+    if s.Profile.TotalEscapes >= 10 and not s.Profile.Achievements["TenEscapes"] then
+        s.Profile.Achievements["TenEscapes"] = true
+        giveRep(player, 50)
+        remotes.Toast:FireClient(player, "Achievement: 10 Escapes! (+50 Rep)")
+    end
+end
+
+-- ============================================================
+-- ProcessReceipt
+-- ============================================================
+local function processReceipt(receiptInfo)
+    local player = Players:GetPlayerByUserId(receiptInfo.PlayerId)
+    if not player then return Enum.ProductPurchaseDecision.NotProcessedYet end
+    local s = sessions[player]
+    if not s then return Enum.ProductPurchaseDecision.NotProcessedYet end
+
+    -- map ProductId -> config key
+    local key = nil
+    for k, id in pairs(PRODUCT_IDS) do
+        if id ~= 0 and id == receiptInfo.ProductId then key = k break end
+    end
+    if not key then return Enum.ProductPurchaseDecision.NotProcessedYet end
+
+    -- idempotency
+    local receiptId = receiptInfo.PurchaseId
+    if s.Profile.Receipts[receiptId] then
+        return Enum.ProductPurchaseDecision.PurchaseGranted
+    end
+
+    -- status: 1 = Open -> grant; others acknowledged, grant nothing
+    local status = receiptInfo.ProductPurchaseDecision
+    if status == nil then status = 1 end
+    if status ~= 1 then
+        return Enum.ProductPurchaseDecision.PurchaseGranted
+    end
+
+    if grantProduct(player, key) then
+        s.Profile.Receipts[receiptId] = true
+        saveProfile(player)
+        remotes.Toast:FireClient(player, "product:" .. key)
+    end
+    return Enum.ProductPurchaseDecision.PurchaseGranted
+end
+
+MarketplaceService.ProcessReceipt = processReceipt
+
+-- Pass purchase finished
+MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, purchasedPassId, purchaseSuccess)
+    if not purchaseSuccess then return end
+    for key, cfg in pairs(Config.PASSES) do
+        if cfg.Id ~= 0 and cfg.Id == purchasedPassId then
+            grantPass(player, key)
+            return
+        end
+    end
+end)
+
+-- ============================================================
+-- Player join / leave
+-- ============================================================
+local function onPlayerAdded(player)
+    local profile = loadProfile(player)
+    local s = {
+        Player = player,
+        Profile = profile,
+        Coins = profile.Coins,
+        Pebbles = 5,
+        PebbleCap = 5,
+        Alive = true,
+        CurrentRoom = 0,
+        SpeedBoostExpiry = 0,
+        ReviveTokens = 0,
+        CoinBoost = 1,
+        SprintMult = 1,
+        RespawnShield = false,
+        PebbleCapBonus = 0,
+        DamageTaken = 0,
+    }
+    sessions[player] = s
+
+    -- PolicyService attributes
+    pcall(function()
+        local policy = PolicyService:GetPolicyInfoForPlayerAsync(player)
+        player:SetAttribute("PaidRandomAllowed", not (policy.ArePaidRandomItemsRestricted == true))
+        player:SetAttribute("PaidTradingAllowed", policy.IsPaidItemTradingAllowed == true)
+    end)
+
+    -- pass ownership check
+    for key, cfg in pairs(Config.PASSES) do
+        if cfg.Id ~= 0 then
+            local ok, owns = pcall(function()
+                return MarketplaceService:UserOwnsGamePassAsync(player.UserId, cfg.Id)
+            end)
+            if ok and owns then
+                s.Profile.Passes[key] = true
+                -- apply grants
+                if cfg.Grants.CoinBoost then s.CoinBoost = cfg.Grants.CoinBoost end
+                if cfg.Grants.SprintMult then s.SprintMult = (s.SprintMult or 1) * cfg.Grants.SprintMult end
+                if cfg.Grants.PebbleCap then s.PebbleCapBonus = (s.PebbleCapBonus or 0) + cfg.Grants.PebbleCap end
+                if cfg.Grants.RespawnShield then s.RespawnShield = true end
+                if cfg.Grants.Trail then
+                    if not contains(s.Profile.Cosmetics, cfg.Grants.Trail) then
+                        table.insert(s.Profile.Cosmetics, cfg.Grants.Trail)
+                    end
+                end
+            end
+        end
+    end
+
+    -- rep tier check on join (grant free gear for old saves)
+    checkRepTier(player)
+
+    -- daily reward check
+    local now = os.time()
+    local lastLogin = s.Profile.LastLogin or 0
+    local hoursSince = (now - lastLogin) / 3600
+    if hoursSince >= 24 then
+        -- streak
+        if hoursSince <= Config.STREAK_RESET_HOURS then
+            s.Profile.DailyStreak = (s.Profile.DailyStreak or 0) + 1
+        else
+            s.Profile.DailyStreak = 1
+        end
+        if s.Profile.DailyStreak > 100 then s.Profile.DailyStreak = 100 end
+        s.Profile.LastLogin = now
+        -- milestone check
+        for _, m in ipairs(Config.STREAK_MILESTONES) do
+            if s.Profile.DailyStreak == m then
+                giveRep(player, m)
+                remotes.Toast:FireClient(player, "Streak milestone: " .. m .. " days! (+" .. m .. " Rep)")
+            end
+        end
+        -- daily reward
+        local dayIndex = ((s.Profile.DailyStreak - 1) % 7) + 1
+        local reward = Config.DAILY_REWARDS[dayIndex]
+        if reward then
+            giveCoins(player, reward.Coins)
+            remotes.DailyReward:FireClient(player, dayIndex, reward)
+        end
+        saveProfile(player)
+    end
+
+    -- social proof counter
+    gameState.OnlineCount = gameState.OnlineCount + 1
+    remotes.SocialProof:FireAllClients(gameState.EscapesToday, gameState.OnlineCount)
+
+    -- try auto start
+    tryAutoStart()
+end
+
+local function onPlayerRemoving(player)
+    saveProfile(player)
+    sessions[player] = nil
+    rateLimits[player] = nil
+    gameState.OnlineCount = math.max(0, gameState.OnlineCount - 1)
+    remotes.SocialProof:FireAllClients(gameState.EscapesToday, gameState.OnlineCount)
+    -- remove from round players
+    gameState.Players[player.UserId] = nil
+end
+
+Players.PlayerAdded:Connect(onPlayerAdded)
+Players.PlayerRemoving:Connect(onPlayerRemoving)
+
+-- ============================================================
+-- Round loop
+-- ============================================================
+spawnEntity = function()
+    -- create entity part (server-side, anchored false, CanCollide true)
+    local part = Instance.new("Part")
+    part.Name = "Entity"
+    part.Size = Vector3.new(4, 6, 4)
+    part.Position = Vector3.new(0, 3, -50)
+    part.Anchored = false
+    part.CanCollide = true
+    part.BrickColor = BrickColor.new("Really black")
+    part.Parent = workspace
+    gameState.Entity = part
+    return part
+end
+
+damagePlayer = function(player, amount)
+    local s = sessions[player]
+    if not s or not s.Alive then return end
+    -- respawn shield
+    if s.RespawnShield and s.DamageTaken == 0 then
+        s.RespawnShield = false
+        remotes.Toast:FireClient(player, "Respawn shield absorbed the hit!")
+        return
+    end
+    s.DamageTaken = s.DamageTaken + amount
+    remotes.EntityDamage:FireClient(player, s.DamageTaken, 100)
+    if s.DamageTaken >= 100 then
+        s.Alive = false
+        -- death
+        s.Profile.TotalDeaths = (s.Profile.TotalDeaths or 0) + 1
+        remotes.Toast:FireClient(player, "You were caught! (+" .. (s.Profile.TotalDeaths) .. " deaths)")
+        -- check all dead
+        local allDead = true
+        for _, ps in pairs(gameState.Players) do
+            if ps.alive then allDead = false break end
+        end
+        if allDead then
+            endRound("Death")
+        end
+    end
+end
+
+-- Entity AI module (callback-based damage)
+local EntityAI = {}
+EntityAI.DamageCallback = damagePlayer
+
+local function entityStep(dt)
+    local ent = gameState.Entity
+    if not ent or gameState.Phase ~= "Playing" then return end
+    -- find nearest alive player
+    local target = nil
+    local bestDist = math.huge
+    for userId, ps in pairs(gameState.Players) do
+        if ps.alive and ps.player and ps.player.Character then
+            local hrp = ps.player.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local d = (hrp.Position - ent.Position).Magnitude
+                if d < bestDist then bestDist = d target = ps end
+            end
+        end
+    end
+    if not target then return end
+    -- move toward target if within hearing
+    local hrp = target.player.Character:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        local dir = (hrp.Position - ent.Position)
+        local dist = dir.Magnitude
+        if dist > 0 and dist < Config.ENTITY.HearingRadius then
+            local step = Config.ENTITY.WalkSpeed * dt
+            if step > dist then step = dist end
+            ent.Position = ent.Position + (dir.Unit * step)
+        end
+        -- damage if close
+        if dist <= Config.ENTITY.DamageRange then
+            EntityAI.DamageCallback(target.player, Config.ENTITY.Damage)
+        end
+    end
+end
+
+startRound = function()
+    if gameState.Phase ~= "Lobby" then return end
+    gameState.Phase = "Playing"
+    gameState.RoundStart = tick()
+    gameState.AllFloorsCleared = false
+    gameState.LastRoundAllCleared = false
+    -- reset players
+    for userId, ps in pairs(gameState.Players) do
+        ps.alive = true
+        ps.currentRoom = 0
+        ps.damageTaken = 0
+        local s = sessions[ps.player]
+        if s then
+            s.Alive = true
+            s.DamageTaken = 0
+            s.CurrentRoom = 0
+        end
+    end
+    -- spawn entity
+    if gameState.Entity then
+        gameState.Entity:Destroy()
+        gameState.Entity = nil
+    end
+    spawnEntity()
+    -- fire client
+    for _, p in ipairs(Players:GetPlayers()) do
+        remotes.GameStart:FireClient(p, gameState.CurrentFloor)
+    end
+    -- heartbeat
+    if gameState.HeartbeatConn then
+        gameState.HeartbeatConn:Disconnect()
+        gameState.HeartbeatConn = nil
+    end
+    gameState.HeartbeatConn = RunService.Heartbeat:Connect(function(dt)
+        entityStep(dt)
+        -- time check
+        if tick() - gameState.RoundStart >= Config.ROUND_TIME then
+            endRound("TimeUp")
+        end
+    end)
+end
+
+endRound = function(reason)
+    if gameState.Phase ~= "Playing" then return end
+    gameState.Phase = "Results"
+    if gameState.HeartbeatConn then
+        gameState.HeartbeatConn:Disconnect()
+        gameState.HeartbeatConn = nil
+    end
+    -- destroy entity
+    if gameState.Entity then
+        gameState.Entity:Destroy()
+        gameState.Entity = nil
+    end
+
+    local allCleared = (reason == "Escape" and gameState.CurrentFloor >= Config.MAX_FLOOR)
+    if allCleared then
+        gameState.LastRoundAllCleared = true
+    else
+        gameState.LastRoundAllCleared = false
+    end
+
+    -- rewards for survivors
+    if reason == "Escape" then
+        for userId, ps in pairs(gameState.Players) do
+            if ps.alive then
+                local s = sessions[ps.player]
+                if s then
+                    local coins = 50 * gameState.CurrentFloor
+                    if hasPass(ps.player, "VIP") then coins = math.floor(coins * 1.5) end
+                    giveCoins(ps.player, coins)
+                    giveRep(ps.player, 10 * gameState.CurrentFloor)
+                    s.Profile.TotalEscapes = (s.Profile.TotalEscapes or 0) + 1
+                    if gameState.CurrentFloor > (s.Profile.BestFloor or 0) then
+                        s.Profile.BestFloor = gameState.CurrentFloor
+                    end
+                    checkAchievements(ps.player)
+                end
+            end
+        end
+        gameState.EscapesToday = gameState.EscapesToday + 1
+    end
+
+    -- floor progression
+    if reason == "Escape" then
+        gameState.CurrentFloor = gameState.CurrentFloor + 1
+        if gameState.CurrentFloor > Config.MAX_FLOOR then
+            gameState.CurrentFloor = 1
+        end
+    end
+    -- Death and TimeUp do NOT advance floor
+
+    -- fire client
+    for _, p in ipairs(Players:GetPlayers()) do
+        remotes.GameEnd:FireClient(p, reason, gameState.LastRoundAllCleared)
+    end
+
+    remotes.SocialProof:FireAllClients(gameState.EscapesToday, gameState.OnlineCount)
+
+    -- intermission then auto-restart
+    task.delay(Config.INTERMISSION, function()
+        if gameState.Phase == "Results" then
+            gameState.Phase = "Lobby"
+            -- auto restart if players present
+            if #Players:GetPlayers() >= 1 then
+                startRound()
+            end
+        end
+    end)
+end
+
+tryAutoStart = function()
+    if gameState.Phase ~= "Lobby" then return end
+    local hasPlayers = #Players:GetPlayers() >= 1
+    if not hasPlayers then
+        -- fallback: check tracked players
+        for _ in pairs(gameState.Players) do hasPlayers = true break end
+    end
+    if hasPlayers then
+        startRound()
+    end
+end
+
+-- ============================================================
+-- Remote handlers (intents)
+-- ============================================================
+remotes.ThrowPebble.OnServerEvent:Connect(function(player, dir)
+    if not rateLimit(player, "throw", 5) then return end
+    if type(dir) ~= "table" then return end
+    local s = sessions[player]
+    if not s or not s.Alive then return end
+    if gameState.Phase ~= "Playing" then return end
+    if s.Pebbles <= 0 then return end
+    s.Pebbles = s.Pebbles - 1
+    s.Profile.Stats.throws = (s.Profile.Stats.throws or 0) + 1
+    -- notify entity (sound) — handled by client FX; server just counts
+end)
+
+remotes.OpenValve.OnServerEvent:Connect(function(player, valveIndex)
+    if not rateLimit(player, "valve", 3) then return end
+    if type(valveIndex) ~= "number" then return end
+    local s = sessions[player]
+    if not s or not s.Alive then return end
+    if gameState.Phase ~= "Playing" then return end
+    if gameState.CurrentFloor ~= 8 then return end
+    if valveIndex < 1 or valveIndex > 2 then return end
+    s.Profile.Stats.valves = (s.Profile.Stats.valves or 0) + 1
+    -- if both valves open, trigger escape
+    -- (simplified: client tracks; server validates doorIndex == CurrentRoom+1)
+end)
+
+remotes.ReviveRequest.OnServerEvent:Connect(function(player)
+    if not rateLimit(player, "revive", 2) then return end
+    local s = sessions[player]
+    if not s then return end
+    if s.Alive then return end
+    if (s.ReviveTokens or 0) <= 0 then
+        remotes.Toast:FireClient(player, "No revive tokens. Buy one in the store.")
+        return
+    end
+    s.ReviveTokens = s.ReviveTokens - 1
+    s.Alive = true
+    s.DamageTaken = 0
+    s.Profile.Stats.revives = (s.Profile.Stats.revives or 0) + 1
+    remotes.Toast:FireClient(player, "Revived!")
+end)
+
+remotes.BuyUpgrade.OnServerInvoke = function(player, upgradeId)
+    if type(upgradeId) ~= "string" then return false, "invalid" end
+    if not rateLimit(player, "buy", 5) then return false, "rate limited" end
+    local s = sessions[player]
+    if not s then return false, "no session" end
+    -- find upgrade
+    local upg = nil
+    for _, u in ipairs(Config.UPGRADES) do
+        if u.Id == upgradeId then upg = u break end
+    end
+    if not upg then return false, "unknown upgrade" end
+    local gear = Config.Gear[upgradeId]
+    if not gear or gear.Source ~= "coils" then return false, "not purchasable with coins" end
+    if s.Profile.Gear[upgradeId] then return false, "already owned" end
+    if (s.Profile.Coins or 0) < upg.Price then return false, "not enough coins" end
+    -- deduct
+    s.Profile.Coins = s.Profile.Coins - upg.Price
+    s.Profile.Gear[upgradeId] = true
+    -- apply effect
+    if gear.Effect then
+        if gear.Effect.ThrowRange then s.ThrowRange = (s.ThrowRange or 0) + gear.Effect.ThrowRange end
+        if gear.Effect.PebbleCap then s.PebbleCap = gear.Effect.PebbleCap end
+        if gear.Effect.RescueSpeed then s.RescueSpeed = gear.Effect.RescueSpeed end
+        if gear.Effect.ValveSpeed then s.ValveSpeed = gear.Effect.ValveSpeed end
+        if gear.Effect.WalkSpeed then s.WalkSpeedBonus = (s.WalkSpeedBonus or 0) + gear.Effect.WalkSpeed end
+        if gear.Effect.PickupRadius then s.PickupRadius = (s.PickupRadius or 0) + gear.Effect.PickupRadius end
+    end
+    saveProfile(player)
+    remotes.CoinUpdate:FireClient(player, s.Profile.Coins)
+    remotes.Toast:FireClient(player, "Purchased: " .. gear.Name)
+    return true, "ok"
+end
+
+remotes.ClaimDaily.OnServerInvoke = function(player)
+    if not rateLimit(player, "daily", 2) then return false, "rate limited" end
+    local s = sessions[player]
+    if not s then return false, "no session" end
+    -- daily already handled on join; this is a manual claim fallback
+    return true, "claimed"
+end
+
+remotes.PromptPurchase.OnServerInvoke = function(player, productIdOrKey, isPass)
+    if type(productIdOrKey) ~= "string" and type(productIdOrKey) ~= "number" then return false end
+    if isPass then
+        -- find pass id
+        local cfg = Config.PASSES[productIdOrKey]
+        if not cfg or cfg.Id == 0 then
+            remotes.Toast:FireClient(player, "Setup pending — pass not configured yet.")
+            return false
+        end
+        MarketplaceService:PromptGamePassPurchase(player, cfg.Id)
+    else
+        local cfg = Config.PRODUCTS[productIdOrKey]
+        if not cfg or cfg.Id == 0 then
+            remotes.Toast:FireClient(player, "Setup pending — product not configured yet.")
+            return false
+        end
+        MarketplaceService:PromptProductPurchase(player, cfg.Id)
+    end
+    return true
+end
+
+-- Quick chat (proximity-scoped, fixed list)
+local QUICK_CHAT_LINES = {
+    "Help!", "Over here!", "Run!", "Wait!", "I found pebbles", "Open the valve!", "Monster incoming!", "Revive me!"
+}
+remotes.QuickChat.OnServerEvent:Connect(function(player, lineIndex)
+    if not rateLimit(player, "chat", 3) then return end
+    if type(lineIndex) ~= "number" then return end
+    if lineIndex < 1 or lineIndex > #QUICK_CHAT_LINES then return end
+    local s = sessions[player]
+    if not s or not player.Character then return end
+    local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    for _, other in ipairs(Players:GetPlayers()) do
+        if other ~= player and other.Character then
+            local ohrp = other.Character:FindFirstChild("HumanoidRootPart")
+            if ohrp and (ohrp.Position - hrp.Position).Magnitude <= 50 then
+                remotes.QuickChat:FireClient(other, player.Name, QUICK_CHAT_LINES[lineIndex])
+            end
+        end
+    end
+end)
+
+-- Door opened validation (client reports door index; server validates sequential)
+remotes.DoorOpened.OnServerEvent:Connect(function(player, doorIndex)
+    if not rateLimit(player, "door", 5) then return end
+    if type(doorIndex) ~= "number" then return end
+    local s = sessions[player]
+    if not s or not s.Alive then return end
+    if gameState.Phase ~= "Playing" then return end
+    if doorIndex ~= (s.CurrentRoom or 0) + 1 then
+        warn("Invalid door skip attempt by " .. player.Name)
+        return
+    end
+    s.CurrentRoom = doorIndex
+    -- if reached last door of floor, escape
+    local roomCount = #Config.ROOMS
+    if s.CurrentRoom >= roomCount then
+        -- escape
+        if not s.Profile.Achievements then s.Profile.Achievements = {} end
+        endRound("Escape")
+    end
+end)
+
+-- ============================================================
+-- Export test hook (test-only, not shipped behavior)
+-- ============================================================
+__BLOX_TEST__ = {
+    PASS_IDS = PASS_IDS,
+    PRODUCT_IDS = PRODUCT_IDS,
+    sessions = sessions,
+    gameState = gameState,
+    getProfile = function(player)
+        local s = sessions[player]
+        return s and s.Profile or nil
+    end,
+    grantProduct = grantProduct,
+    grantPass = grantPass,
+    giveCoins = giveCoins,
+    giveRep = giveRep,
+    processReceipt = processReceipt,
+    startRound = startRound,
+    endRound = endRound,
+    tryAutoStart = tryAutoStart,
+    Config = Config,
+}
+
+-- ============================================================
+-- Init: ensure players already in server get handled
+-- ============================================================
+for _, p in ipairs(Players:GetPlayers()) do
+    onPlayerAdded(p)
+end
+]]></ProtectedString>
+			</Properties>
+		</Item>
+	</Item>
+	<Item class="StarterPlayer" referent="RBX-SP">
+		<Properties><string name="Name">StarterPlayer</string></Properties>
+		<Item class="StarterCharacterScripts" referent="RBX-SCS">
+			<Properties><string name="Name">StarterCharacterScripts</string></Properties>
+			<Item class="LocalScript" referent="RBX-CLI">
+				<Properties>
+					<string name="Name">BloxClient</string>
+					<ProtectedString name="Source"><![CDATA[-- Silent Flood — BloxClient (LocalScript, StarterPlayer/StarterCharacterScripts)
+-- HUD, store, targeting, FX. Never decides money or purchases.
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+local MarketplaceService = game:GetService("MarketplaceService")
+
+local player = Players.LocalPlayer
+local Config = require(ReplicatedStorage:WaitForChild("BloxConfig"))
+
+-- Remotes
+local remotes = {}
+local function getRemote(name)
+    local r = ReplicatedStorage:WaitForChild(name, 10)
+    return r
+end
+
+task.delay(1, function()
+    remotes.GameStart = getRemote("GameStartRemote")
+    remotes.GameEnd = getRemote("GameEndRemote")
+    remotes.EntityDamage = getRemote("EntityDamageRemote")
+    remotes.DoorOpened = getRemote("DoorOpenedRemote")
+    remotes.CoinUpdate = getRemote("CoinUpdateRemote")
+    remotes.RepUpdate = getRemote("RepUpdateRemote")
+    remotes.Toast = getRemote("ToastRemote")
+    remotes.StoreUpdate = getRemote("StoreUpdateRemote")
+    remotes.SocialProof = getRemote("SocialProofRemote")
+    remotes.DailyReward = getRemote("DailyRewardRemote")
+    remotes.LootResult = getRemote("LootResultRemote")
+    remotes.QuickChat = getRemote("QuickChatRemote")
+    remotes.BuyUpgrade = getRemote("BuyUpgradeRemote")
+    remotes.ClaimDaily = getRemote("ClaimDailyRemote")
+    remotes.PromptPurchase = getRemote("PromptPurchaseRemote")
+    remotes.ThrowPebble = getRemote("ThrowPebbleRemote")
+    remotes.OpenValve = getRemote("OpenValveRemote")
+    remotes.ReviveRequest = getRemote("ReviveRequestRemote")
+end)
+
+-- ============================================================
+-- State
+-- ============================================================
+local state = {
+    coins = 0,
+    rep = 0,
+    repTier = 1,
+    pebbles = 5,
+    pebbleCap = 5,
+    alive = true,
+    currentFloor = 1,
+    currentRoom = 0,
+    totalRooms = #Config.ROOMS,
+    speedBoostExpiry = 0,
+    sprinting = false,
+    currentFloorDisplay = 1,
+}
+
+-- ============================================================
+-- HUD helpers
+-- ============================================================
+local function makeLabel(parent, text, pos, size)
+    local l = Instance.new("TextLabel")
+    l.Text = text
+    l.Position = pos or UDim2.new(0, 10, 0, 10)
+    l.Size = size or UDim2.new(0, 200, 0, 30)
+    l.BackgroundTransparency = 0.5
+    l.BackgroundColor3 = Color3.new(0, 0, 0)
+    l.TextColor3 = Color3.new(1, 1, 1)
+    l.Font = Enum.Font.GothamBold
+    l.TextSize = 16
+    l.Parent = parent
+    return l
+end
+
+-- Build HUD
+local gui = Instance.new("ScreenGui")
+gui.Name = "SilentFloodHUD"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Top bar: coins, rep, floor
+local topBar = Instance.new("Frame")
+topBar.Size = UDim2.new(1, 0, 0, 40)
+topBar.Position = UDim2.new(0, 0, 0, 0)
+topBar.BackgroundTransparency = 0.3
+topBar.BackgroundColor3 = Color3.new(0, 0, 0)
+topBar.Parent = gui
+
+local coinsLabel = makeLabel(topBar, "Coins: 0", UDim2.new(0, 10, 0, 5), UDim2.new(0, 120, 0, 30))
+local repLabel = makeLabel(topBar, "Rep: 0 (Tier 1)", UDim2.new(0, 140, 0, 5), UDim2.new(0, 160, 0, 30))
+local floorLabel = makeLabel(topBar, "Floor 1/8", UDim2.new(0, 310, 0, 5), UDim2.new(0, 120, 0, 30))
+local pebblesLabel = makeLabel(topBar, "Pebbles: 5/5", UDim2.new(0, 440, 0, 5), UDim2.new(0, 140, 0, 30))
+local roomLabel = makeLabel(topBar, "Door 0/8", UDim2.new(0, 590, 0, 5), UDim2.new(0, 120, 0, 30))
+
+-- Health bar
+local healthBar = Instance.new("Frame")
+healthBar.Size = UDim2.new(0, 200, 0, 20)
+healthBar.Position = UDim2.new(0, 10, 1, -30)
+healthBar.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+healthBar.Parent = gui
+local healthFill = Instance.new("Frame")
+healthFill.Size = UDim2.new(1, 0, 1, 0)
+healthFill.BackgroundColor3 = Color3.new(0, 0.8, 0)
+healthFill.Parent = healthBar
+
+-- Near-miss / toast
+local toastLabel = makeLabel(gui, "", UDim2.new(0.5, -150, 0.8, 0), UDim2.new(0, 300, 0, 40))
+toastLabel.TextWrapped = true
+toastLabel.Visible = false
+
+-- Social proof banner
+local socialLabel = makeLabel(gui, "", UDim2.new(0.5, -200, 0, 45), UDim2.new(0, 400, 0, 25))
+socialLabel.TextSize = 12
+socialLabel.TextColor3 = Color3.new(0.8, 0.8, 1)
+
+-- Daily reward popup (hidden)
+local dailyFrame = Instance.new("Frame")
+dailyFrame.Size = UDim2.new(0, 300, 0, 200)
+dailyFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
+dailyFrame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.15)
+dailyFrame.Visible = false
+dailyFrame.Parent = gui
+local dailyTitle = makeLabel(dailyFrame, "Daily Reward!", UDim2.new(0, 10, 0, 10), UDim2.new(1, -20, 0, 30))
+local dailyInfo = makeLabel(dailyFrame, "", UDim2.new(0, 10, 0, 50), UDim2.new(1, -20, 0, 60))
+dailyInfo.TextWrapped = true
+
+-- Store frame (hidden)
+local storeFrame = Instance.new("Frame")
+storeFrame.Size = UDim2.new(0, 420, 0, 400)
+storeFrame.Position = UDim2.new(0.5, -210, 0.5, -200)
+storeFrame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.15)
+storeFrame.Visible = false
+storeFrame.Parent = gui
+local storeTitle = makeLabel(storeFrame, "Store", UDim2.new(0, 10, 0, 10), UDim2.new(1, -20, 0, 30))
+
+-- Store tabs: Upgrades (coins), Passes, Products (Robux)
+local storeTabs = Instance.new("Frame")
+storeTabs.Size = UDim2.new(1, -20, 0, 30)
+storeTabs.Position = UDim2.new(0, 10, 0, 45)
+storeTabs.BackgroundTransparency = 1
+storeTabs.Parent = storeFrame
+
+local storeContent = Instance.new("ScrollingFrame")
+storeContent.Size = UDim2.new(1, -20, 1, -90)
+storeContent.Position = UDim2.new(0, 10, 0, 80)
+storeContent.BackgroundTransparency = 1
+storeContent.Parent = storeFrame
+
+local function clearStore()
+    for _, c in ipairs(storeContent:GetChildren()) do
+        if c:IsA("GuiObject") then c:Destroy() end
+    end
+end
+
+local function addStoreRow(text, btnText, onClick)
+    local row = Instance.new("Frame")
+    row.Size = UDim2.new(1, 0, 0, 40)
+    row.BackgroundTransparency = 0.8
+    row.BackgroundColor3 = Color3.new(0.2, 0.2, 0.3)
+    row.Parent = storeContent
+    local lbl = Instance.new("TextLabel")
+    lbl.Text = text
+    lbl.Size = UDim2.new(0.6, 0, 1, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.TextColor3 = Color3.new(1, 1, 1)
+    lbl.Font = Enum.Font.Gotham
+    lbl.TextSize = 14
+    lbl.Parent = row
+    local btn = Instance.new("TextButton")
+    btn.Text = btnText
+    btn.Size = UDim2.new(0.35, 0, 0.8, 0)
+    btn.Position = UDim2.new(0.62, 0, 0.1, 0)
+    btn.BackgroundColor3 = Color3.new(0.2, 0.6, 0.2)
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Parent = row
+    btn.MouseButton1Click:Connect(onClick)
+    return row
+end
+
+local function populateUpgrades()
+    clearStore()
+    for _, u in ipairs(Config.UPGRADES) do
+        local gear = Config.Gear[u.Id]
+        addStoreRow(u.Name .. " — " .. u.Price .. " coins", "Buy", function()
+            local ok, msg = remotes.BuyUpgrade:InvokeServer(u.Id)
+            if not ok then
+                showToast(msg or "Failed")
+            end
+        end)
+    end
+end
+
+local function populatePasses()
+    clearStore()
+    for key, cfg in pairs(Config.PASSES) do
+        addStoreRow(cfg.Name or key .. " — " .. cfg.Price .. " R$", "Buy Robux", function()
+            remotes.PromptPurchase:InvokeServer(key, true)
+        end)
+    end
+end
+
+local function populateProducts()
+    clearStore()
+    for key, cfg in pairs(Config.PRODUCTS) do
+        local label = key .. " — " .. cfg.Price .. " R$"
+        if key == "LuckyPebble" then
+            label = label .. " (odds: 50/30/15/5%)"
+        end
+        addStoreRow(label, "Buy Robux", function()
+            remotes.PromptPurchase:InvokeServer(key, false)
+        end)
+    end
+end
+
+-- Tab buttons
+local function makeTab(text, x, onClick)
+    local b = Instance.new("TextButton")
+    b.Text = text
+    b.Size = UDim2.new(0, 120, 1, 0)
+    b.Position = UDim2.new(0, x, 0, 0)
+    b.Parent = storeTabs
+    b.MouseButton1Click:Connect(onClick)
+    return b
+end
+makeTab("Upgrades", 0, populateUpgrades)
+makeTab("Passes", 130, populatePasses)
+makeTab("Robux", 260, populateProducts)
+
+-- ============================================================
+-- Toast helper
+-- ============================================================
+local toastTimer = 0
+local function showToast(msg)
+    toastLabel.Text = msg
+    toastLabel.Visible = true
+    toastTimer = 3
+end
+
+-- ============================================================
+-- Remote handlers
+-- ============================================================
+local function setupHandlers()
+    remotes.GameStart.OnClientEvent:Connect(function(floor)
+        state.currentFloorDisplay = floor
+        state.currentRoom = 0
+        state.alive = true
+        floorLabel.Text = "Floor " .. floor .. "/" .. Config.MAX_FLOOR
+        roomLabel.Text = "Door 0/" .. state.totalRooms
+        showToast("Floor " .. floor .. " — stay quiet!")
+    end)
+
+    remotes.GameEnd.OnClientEvent:Connect(function(reason, allCleared)
+        if reason == "Escape" then
+            showToast("Escaped! +" .. (50 * state.currentFloorDisplay) .. " coins")
+            if allCleared then
+                showToast("ALL FLOORS CLEARED! Victory!")
+            end
+        elseif reason == "Death" then
+            showToast("Caught! Try again.")
+        elseif reason == "TimeUp" then
+            showToast("Time's up! You were " .. (state.totalRooms - state.currentRoom) .. " doors away.")
+        end
+    end)
+
+    remotes.EntityDamage.OnClientEvent:Connect(function(damageTaken, maxHp)
+        local pct = 1 - (damageTaken / maxHp)
+        if pct < 0 then pct = 0 end
+        healthFill.Size = UDim2.new(pct, 0, 1, 0)
+        if pct < 0.3 then
+            healthFill.BackgroundColor3 = Color3.new(0.9, 0.1, 0.1)
+        elseif pct < 0.6 then
+            healthFill.BackgroundColor3 = Color3.new(0.9, 0.7, 0.1)
+        else
+            healthFill.BackgroundColor3 = Color3.new(0, 0.8, 0)
+        end
+        -- screen flash
+        healthBar.BackgroundColor3 = Color3.new(0.8, 0.1, 0.1)
+        task.delay(0.2, function() healthBar.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2) end)
+    end)
+
+    remotes.CoinUpdate.OnClientEvent:Connect(function(coins)
+        state.coins = coins
+        coinsLabel.Text = "Coins: " .. coins
+    end)
+
+    remotes.RepUpdate.OnClientEvent:Connect(function(rep, tier)
+        state.rep = rep
+        state.repTier = tier
+        repLabel.Text = "Rep: " .. rep .. " (Tier " .. tier .. ")"
+    end)
+
+    remotes.Toast.OnClientEvent:Connect(function(msg)
+        showToast(msg)
+    end)
+
+    remotes.SocialProof.OnClientEvent:Connect(function(escapes, online)
+        socialLabel.Text = escapes .. " players escaped today · " .. online .. " online now"
+    end)
+
+    remotes.DailyReward.OnClientEvent:Connect(function(dayIndex, reward)
+        dailyFrame.Visible = true
+        dailyInfo.Text = "Day " .. dayIndex .. ": +" .. reward.Coins .. " coins" ..
+            (reward.Item and ("\n+ " .. reward.Item) or "")
+        task.delay(5, function() dailyFrame.Visible = false end)
+    end)
+
+    remotes.LootResult.OnClientEvent:Connect(function(outcome)
+        showToast("Lucky Pebble: " .. outcome)
+    end)
+
+    remotes.QuickChat.OnClientEvent:Connect(function(sender, line)
+        showToast(sender .. ": " .. line)
+    end)
+end
+
+task.delay(1.5, setupHandlers)
+
+-- ============================================================
+-- Input handling
+-- ============================================================
+-- Throw pebble on click (raycast not needed; send intent)
+UserInputService.InputBegan:Connect(function(input, processed)
+    if processed then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if remotes.ThrowPebble then
+            remotes.ThrowPebble:FireServer({ x = 0, y = 0, z = 1 })
+        end
+    end
+    if input.KeyCode == Enum.KeyCode.E then
+        -- open valve (client sends intent; server validates)
+        if remotes.OpenValve then
+            remotes.OpenValve:FireServer(1)
+        end
+    end
+    if input.KeyCode == Enum.KeyCode.F then
+        -- revive request
+        if remotes.ReviveRequest then
+            remotes.ReviveRequest:FireServer()
+        end
+    end
+    if input.KeyCode == Enum.KeyCode.Tab then
+        storeFrame.Visible = not storeFrame.Visible
+        if storeFrame.Visible then populateUpgrades() end
+    end
+    -- Sprint
+    if input.KeyCode == Enum.KeyCode.LeftShift then
+        state.sprinting = true
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.LeftShift then
+        state.sprinting = false
+    end
+end)
+
+-- Sprint speed apply
+local function applySprint()
+    local char = player.Character
+    if not char then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+    local base = 16
+    if state.sprinting then
+        hum.WalkSpeed = base * 1.5
+    else
+        hum.WalkSpeed = base
+    end
+end
+
+-- ============================================================
+-- Door progress (client tracks room, reports to server)
+-- ============================================================
+local function onDoorTouched(doorIndex)
+    if remotes.DoorOpened then
+        remotes.DoorOpened:FireServer(doorIndex)
+    end
+    state.currentRoom = doorIndex
+    roomLabel.Text = "Door " .. doorIndex .. "/" .. state.totalRooms
+    -- Zeigarnik progress
+    if doorIndex < state.totalRooms then
+        showToast("Door " .. doorIndex .. "/" .. state.totalRooms .. " — keep going!")
+    end
+end
+
+-- ============================================================
+-- Update loop
+-- ============================================================
+local function updateLoop()
+    while true do
+        task.wait(0.1)
+        applySprint()
+        -- speed boost expiry
+        if state.speedBoostExpiry > 0 and tick() > state.speedBoostExpiry then
+            state.speedBoostExpiry = 0
+            showToast("Speed boost expired")
+        end
+        -- pebbles label
+        pebblesLabel.Text = "Pebbles: " .. state.pebbles .. "/" .. state.pebbleCap
+    end
+end
+
+task.spawn(updateLoop)
+
+-- ============================================================
+-- Near-miss messaging on death/timeout handled in GameEnd
+-- ============================================================
+
+-- ============================================================
+-- Claim daily on join
+-- ============================================================
+task.delay(3, function()
+    if remotes.ClaimDaily then
+        remotes.ClaimDaily:InvokeServer()
+    end
+end)
+
+print("Silent Flood client loaded")
+]]></ProtectedString>
+				</Properties>
+			</Item>
+		</Item>
+	</Item>
+	<Item class="Lighting" referent="RBX-LT">
+		<Properties><string name="Name">Lighting</string></Properties>
+	</Item>
+</roblox>
