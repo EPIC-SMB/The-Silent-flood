@@ -247,9 +247,10 @@ grantProduct = function(player, productKey)
         end
     end
     if g.Coins then
-        local mult = s.CoinBoost or 1
-        if hasPass(player, "VIP") then mult = mult * 1.5 end
-        -- VIP boost already in CoinBoost? apply once
+        local mult = 1
+        if hasPass(player, "VIP") then
+            mult = 1.5
+        end
         giveCoins(player, math.floor(g.Coins * mult))
     end
     if g.Revive then
